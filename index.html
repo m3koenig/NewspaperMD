@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Markdown-Zeitungs-Renderer v0.5.0</title>
+    <title>Markdown-Zeitungs-Renderer v0.7.0</title>
     
     <!-- Dynamisches Manifest für die PWA-Fähigkeit -->
     <link rel="manifest" id="manifest-link">
@@ -11,6 +11,7 @@
     
     <!-- Externe Bibliotheken -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -82,8 +83,12 @@
         }
         
         figure.news-image {
-            margin: 25px 0; break-inside: avoid; column-span: all; text-align: center;
+            margin: 25px auto; break-inside: avoid; text-align: center;
         }
+        figure.img-full { column-span: all; width: 100%; }
+        figure.img-medium { column-span: all; width: 60%; }
+        figure.img-small { column-span: none; width: 100%; margin: 15px 0; }
+        
         figure.news-image img { width: 100%; height: auto; display: block; border: 1px solid #e5e7eb; border-radius: 2px; }
         figure.news-image figcaption {
             font-family: 'Merriweather', serif;
@@ -100,7 +105,7 @@
                 <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
                 <h1 class="text-xl font-bold tracking-tight">Zeitungs-Renderer</h1>
             </div>
-            <div class="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400 border border-slate-700">v0.5.0</div>
+            <div class="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400 border border-slate-700">v0.7.0</div>
         </div>
     </header>
 
@@ -134,10 +139,14 @@
         </div>
 
         <div class="w-full md:w-1/2 lg:w-7/12 bg-slate-200 rounded-xl overflow-hidden relative flex flex-col h-1/2 md:h-full border border-slate-300 shadow-inner">
-            <div class="absolute top-4 right-4 z-10">
-                <button onclick="exportPDF()" class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-200">
+            <div class="absolute top-4 right-4 z-10 flex gap-2">
+                <button onclick="exportImage()" class="flex items-center gap-2 px-3 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-200" title="Als Bild (PNG) exportieren">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="hidden xl:inline">Bild Export</span>
+                </button>
+                <button onclick="exportPDF()" class="flex items-center gap-2 px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-200" title="Als PDF exportieren">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    PDF Exportieren
+                    <span class="hidden xl:inline">PDF Export</span>
                 </button>
             </div>
             
@@ -172,7 +181,7 @@
         const deleteModal = document.getElementById('delete-modal');
         const deleteModalContent = document.getElementById('delete-modal-content');
         
-        const demoMarkdown = `# Die digitale Revolution\n## Ein neues Zeitalter der Typografie\nEs ist erstaunlich, wie einfach sich strukturierter Markdown-Text in ein klassisches Zeitungs-Layout verwandeln lässt.\n\n### Warum dieses Format?\nDie Lesbarkeit von Texten hängt stark von der Spaltenbreite ab. Das zweispaltige Layout ist der goldene Mittelweg.\n\n### Bild-Anatomie\n![Eine Pixelfrau im Stardew-Valley-Stil (Foto: Eigenproduktion)](data:image/png;base64,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)\n\nDies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)`;
+        const demoMarkdown = `# Die digitale Revolution\n## Ein neues Zeitalter der Typografie\nEs ist erstaunlich, wie einfach sich strukturierter Markdown-Text in ein klassisches Zeitungs-Layout verwandeln lässt.\n\n### Bildgrößen steuern\nDu kannst jetzt die Bildgröße steuern, indem du \`| klein\` oder \`| mittel\` an die Bildbeschreibung hängst.\n\nEin kleines Bild fügt sich direkt in die Textspalte ein:\n\n![Eine Pixelfrau | klein](data:image/png;base64,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)\n\nDies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)`;
 
         window.onload = () => {
             const saved = localStorage.getItem('newspaper-draft');
@@ -182,9 +191,26 @@
         };
 
         function processMarkdown(text) {
-            // Bilder für das Zeitungs-Layout formatieren
-            return text.replace(/!\[(.*?)\]\((.*?)\)/g, 
-                '<figure class="news-image"><img src="$2" alt="$1"><figcaption>$1</figcaption></figure>');
+            // Bilder für das Zeitungs-Layout formatieren und Größen erkennen
+            return text.replace(/!\[(.*?)\]\((.*?)\)/g, (match, altText, url) => {
+                let alt = altText;
+                let sizeClass = 'img-full'; // Standard: Groß über alle Spalten
+                
+                // Prüfen, ob ein Größen-Tag mit "|" angehängt wurde
+                if (altText.includes('|')) {
+                    const parts = altText.split('|');
+                    alt = parts[0].trim();
+                    const sizeIndicator = parts[1].trim().toLowerCase();
+                    
+                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') {
+                        sizeClass = 'img-small';
+                    } else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') {
+                        sizeClass = 'img-medium';
+                    }
+                }
+                
+                return `<figure class="news-image ${sizeClass}"><img src="${url}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
+            });
         }
 
         function render() {
@@ -249,6 +275,33 @@
             });
         }
 
+        function exportImage() {
+            const element = document.getElementById('newspaper-output');
+            const originalWidth = element.style.width;
+            
+            // Temporäre Breite für ein sauberes, zweispaltiges Rendering im Bild
+            element.style.width = '800px'; 
+            
+            // html2canvas explizit aufrufen
+            html2canvas(element, {
+                scale: 2, // Hohe Auflösung für scharfen Text
+                useCORS: true, // Erlaubt ggf. externe Bilder
+                backgroundColor: '#fdfbf7' // Nutzt den exakten Papierton
+            }).then(canvas => {
+                // Breite zurücksetzen
+                element.style.width = originalWidth || '100%';
+                
+                // Download anstoßen
+                const link = document.createElement('a');
+                link.download = 'MeineZeitung.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("Fehler beim Bild-Export:", err);
+                element.style.width = originalWidth || '100%';
+            });
+        }
+
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -291,7 +344,7 @@
             // 2. Service Worker dynamisch registrieren
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                    const CACHE_NAME = 'zeitung-v0.5.0';
+                    const CACHE_NAME = 'zeitung-v0.7.0';
                     self.addEventListener('install', (e) => {
                         self.skipWaiting();
                     });
@@ -317,6 +370,15 @@
     ======================================================================
     CHANGELOG
     ======================================================================
+    v0.7.0 (Minor Update: Bildgrößen steuern)
+    - NEU: Custom Markdown-Erweiterung im Alt-Text. Nutze "![Alt-Text | klein](url)" oder "![Alt-Text | mittel](url)" für kleinere Bilder.
+    - VERBESSERT: Kleine Bilder fügen sich nun fließend in die Text-Spalten ein (`column-span: none`), mittlere Bilder bleiben zentriert über alle Spalten.
+
+    v0.6.0 (Minor Update: Bild-Export)
+    - NEU: Funktion zum Exportieren des gerenderten Zeitungsartikels als hochauflösendes PNG-Bild.
+    - NEU: html2canvas-Bibliothek hinzugefügt für zuverlässiges DOM-to-Image Rendering.
+    - VERBESSERT: Export-Buttons gruppiert und responsive optimiert.
+
     v0.5.0 (Minor Update: Newspaper Layout Refactoring)
     - VERBESSERT: Authentischere Zeitungs-Optik durch leicht getönten Papier-Hintergrund (#fdfbf7).
     - VERBESSERT: Spalten-Layout optimiert. H1 und H2 spannen sich nun zwingend über alle Spalten (`column-span: all`).
