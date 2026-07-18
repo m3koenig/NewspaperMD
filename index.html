@@ -682,18 +682,28 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
         function extractImagesFromText() {
             let markdown = editor.value;
             let changes = 0;
+            let newCreations = 0;
+
             markdown = markdown.replace(/(!\[[^\]]*\])\((data:image\/[^;]+;base64,[^\)]+)\)/g, (match, imgPart, dataUrl) => {
                 changes++;
-                const imgId = 'img-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-                localImages[imgId] = dataUrl;
-                return `${imgPart}[${imgId}]`;
+                
+                let existingImgId = Object.keys(localImages).find(key => localImages[key] === dataUrl);
+
+                if (existingImgId) {
+                    return `${imgPart}[${existingImgId}]`;
+                } else {
+                    newCreations++;
+                    const imgId = 'img-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                    localImages[imgId] = dataUrl;
+                    return `${imgPart}[${imgId}]`;
+                }
             });
             editor.value = markdown;
             localStorage.setItem('newspaper-images', JSON.stringify(localImages));
             localStorage.setItem('newspaper-draft', editor.value);
             updateRawImagesView();
             render();
-            alert(changes > 0 ? `${changes} Base64-Bild(er) wurde(n) extrahiert und als Referenz gespeichert.` : 'Keine eingebetteten Base64-Bilder im Text gefunden.');
+            alert(changes > 0 ? `${changes} Bild(er) umgewandelt. Davon wurden ${newCreations} neu im Speicher angelegt.` : 'Keine eingebetteten Base64-Bilder im Text gefunden.');
         }
 
         function insertImageIntoEditor(dataUrl, mode) {
