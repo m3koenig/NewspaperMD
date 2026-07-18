@@ -144,19 +144,28 @@
         let currentArticleId = localStorage.getItem('newspaper-current-id');
 
         const demoMarkdown = `# Die digitale Revolution
+# Die digitale Revolution
 ## Ein neues Zeitalter der Typografie
 Es ist erstaunlich, wie einfach sich strukturierter Markdown-Text in ein klassisches Zeitungs-Layout verwandeln lässt.
 
 ### Warum dieses Format?
 Die Lesbarkeit von Texten hängt stark von der Spaltenbreite ab. Das zweispaltige Layout ist der goldene Mittelweg.
 
+Ein praktisches Beispiel für einen [Referenz-Link][demo-link] ist dieser Satz.
+
 ### Bild-Anatomie
 
-![Eine Pixelfrau | klein](data:image/png;base64,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)
+![Beispielbild | klein][PixelFrau]
 
 Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)
 
-[demo-bild]: img-demo
+## Anderes Demo Bild
+![Beispielbild | mittel][demo-bild]
+
+[demo-link]: https://example.com
+[PixelFrau]: data:image/png;base64,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
+[demo-bild]: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgODAwIDUwMCI+PHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI1MDAiIHJ4PSIyNCIgZmlsbD0iI2Y0ZWZlNiIvPjxyZWN0IHg9IjUyIiB5PSI1OCIgd2lkdGg9IjY5NiIgaGVpZ2h0PSIzODQiIHJ4PSIyMCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZGFjYWI0IiBzdHJva2Utd2lkdGg9IjQiLz48cmVjdCB4PSIxMDQiIHk9IjExNCIgd2lkdGg9IjI5MiIgaGVpZ2h0PSI1OCIgcng9IjEwIiBmaWxsPSIjMGYxNzJhIi8+PHJlY3QgeD0iMTA0IiB5PSIxOTYiIHdpZHRoPSIyMjYiIGhlaWdodD0iMTYiIHJ4PSI4IiBmaWxsPSIjYzI0MTAiLz48cmVjdCB4PSIxMDQiIHk9IjIyNiIgd2lkdGg9IjQ3MiIgaGVpZ2h0PSIxNiIgcnk9IjgiIGZpbGw9IiNkNGQ0ZDgiLz48cmVjdCB4PSIxMDQiIHk9IjI1NCIgd2lkdGg9IjQyMCIgaGVpZ2h0PSIxNiIgcnk9IjgiIGZpbGw9IiNkNGQ0ZDgiLz48cmVjdCB4PSIxMDQiIHk9IjI4MiIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxNiIgcnk9IjgiIGZpbGw9IiNkNGQ0ZDgiLz48cmVjdCB4PSI1MTgiIHk9IjEyNCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxMjAiIHJ4PSIxOCIgZmlsbD0iI2Y1OWUwYiIvPjxyZWN0IHg9IjU0NiIgeT0iMTU4IiB3aWR0aD0iMTA0IiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC45NSIvPjxyZWN0IHg9IjU0NiIgeT0iMTgyIiB3aWR0aD0iODAiIGhlaWdodD0iMTAiIHJ4PSI1IiBmaWxsPSIjZmZmZmZmIiBvcGFjaXR5PSIwLjg1Ii8+PHBhdGggZD0iTTU1NCAzMDBjMzQtNDYgOTQtNzAgMTY0LTYybC0xNiAxMjBISDUzNHoiIGZpbGw9IiNmNTllMGIiLz48cGF0aCBkPSJNNTEwIDMxNGMzNi02MiAxMTAtOTQgMTc4LTg2bC0yNCAxMjBINDk2eiIgZmlsbD0iI2VmNDQ0NCIgb3BhY2l0eT0iMC45Ii8+PHBhdGggZD0iTTE0OCAzNDJjNDQtNDQgMTEwLTY4IDE4MC02OCA0MCAwIDgyIDEyIDExMCAzOGwtOTIgOTZIMTE2eiIgZmlsbD0iI2UyZThmMCIvPjxyZWN0IHg9IjE0MiIgeT0iMzQwIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjgyIiByeD0iMTIiIGZpbGw9IiNmOGZhZmMiLz48cmVjdCB4PSIxNTgiIHk9IjM1NiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0iI2NiZDU1MSIvPjxyZWN0IHg9IjE1OCIgeT0iMzc4IiB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHJ4PSI1IiBmaWxsPSIjY2JkNWUxIi8+PHJlY3QgeD0iMTU4IiB5PSI0MDAiIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMCIgcng9IjUiIGZpbGw9IiNjYmQ1ZTEiLz48L3N2Zz4=
+
 `;
 
         window.onload = () => {
@@ -165,17 +174,93 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
                 localStorage.setItem('newspaper-images', JSON.stringify(localImages));
             }
             const saved = localStorage.getItem('newspaper-draft');
-            editor.value = saved !== null ? saved : demoMarkdown;
+            const initialMarkdown = saved !== null ? saved : demoMarkdown;
+
+            if (!currentArticleId && Object.keys(savedArticles).length === 0) {
+                currentArticleId = 'art-demo';
+                savedArticles[currentArticleId] = {
+                    title: 'Die digitale Revolution',
+                    content: initialMarkdown,
+                    date: new Date().toISOString()
+                };
+                localStorage.setItem('newspaper-articles', JSON.stringify(savedArticles));
+                localStorage.setItem('newspaper-current-id', currentArticleId);
+                localStorage.setItem('newspaper-draft', initialMarkdown);
+            }
+
+            editor.value = initialMarkdown;
             render();
             initPWA();
         };
 
-        function processMarkdown(text) {
-            const formatAsFigure = (altText, urlOrRef, isRef) => {
+        function normalizeReferenceLabel(label) {
+            return label.trim().toLowerCase();
+        }
+
+        function extractReferenceDefinitions(text) {
+            const definitions = {};
+            const lines = text.split(/\r?\n/);
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('>')) return;
+
+                const match = trimmed.match(/^\[([^\]]+)\]:\s*(.+?)(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?$/);
+                if (match) {
+                    const [, id, rawDestination] = match;
+                    let destination = rawDestination.trim();
+
+                    if ((destination.startsWith('<') && destination.endsWith('>')) || (destination.startsWith('(') && destination.endsWith(')'))) {
+                        destination = destination.slice(1, -1).trim();
+                    }
+
+                    definitions[normalizeReferenceLabel(id)] = destination.replace(/^<|>$/g, '');
+                }
+            });
+
+            return definitions;
+        }
+
+        function resolveReferenceStyleLinks(markdown, definitions) {
+            return markdown.replace(/(!)?\[([^\]]+)\]\[([^\]]*)\]/g, (match, imageMarker, label, refLabel) => {
+                if (imageMarker) return match;
+
+                const referenceId = (refLabel || label).trim();
+                const destination = definitions[normalizeReferenceLabel(referenceId)];
+
+                if (!destination) return match;
+                return `[${label}](${destination})`;
+            });
+        }
+
+        function resolveReferenceStyleImages(markdown, definitions) {
+            return markdown.replace(/!\[([^\]]*)\]\[([^\]]*)\]/g, (match, altText, refLabel) => {
+                const referenceId = (refLabel || '').trim();
+                const destination = definitions[normalizeReferenceLabel(referenceId)];
+
+                if (!destination) return match;
+
                 let alt = altText;
-                let sizeClass = 'img-full'; // Default
+                let sizeClass = 'img-full';
+
+                if (altText.includes('|')) {
+                    const parts = altText.split('|');
+                    alt = parts[0].trim();
+                    const sizeIndicator = parts[1].trim().toLowerCase();
+                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') sizeClass = 'img-small';
+                    else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') sizeClass = 'img-medium';
+                }
+
+                const resolvedUrl = localImages[destination] || destination;
+                return `<figure class="news-image ${sizeClass}"><img src="${resolvedUrl}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
+            });
+        }
+
+        function processMarkdown(text) {
+            const formatAsFigure = (altText, urlOrRef) => {
+                let alt = altText;
+                let sizeClass = 'img-full';
                 
-                // Enhanced parsing for | size
                 if (altText.includes('|')) {
                     const parts = altText.split('|');
                     alt = parts[0].trim();
@@ -184,25 +269,16 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
                     else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') sizeClass = 'img-medium';
                 }
                 
-                // Return figure string without wrapping in markdown, preserving attributes
-                return `<figure class="news-image ${sizeClass}"><img src="${isRef ? '' : urlOrRef}" alt="${alt}" data-ref="${isRef ? urlOrRef : ''}"><figcaption>${alt}</figcaption></figure>`;
+                return `<figure class="news-image ${sizeClass}"><img src="${urlOrRef}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
             };
 
-            // Replace Reference-style images first: ![alt][ref]
-            let html = text.replace(/!\[(.*?)\]\[(.*?)\]/g, (match, alt, ref) => formatAsFigure(alt, ref, true));
-            // Then replace direct-style images: ![alt](url)
-            html = html.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => formatAsFigure(alt, url, false));
+            const definitions = extractReferenceDefinitions(text);
+            let html = resolveReferenceStyleLinks(text, definitions);
+            html = resolveReferenceStyleImages(html, definitions);
+            html = html.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => formatAsFigure(alt, url));
 
-            // Process Markdown
             const container = document.createElement('div');
             container.innerHTML = marked.parse(html);
-            
-            // Resolve local images
-            container.querySelectorAll('img[data-ref]').forEach(img => {
-                const refId = img.getAttribute('data-ref');
-                if (localImages[refId]) img.src = localImages[refId];
-            });
-
             return container.innerHTML;
         }
 
@@ -270,13 +346,16 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             closeConfirmModal();
         };
 
-        function saveArticle() {
-            if (!currentArticleId || !savedArticles[currentArticleId]) {
-                // Suche nach der ersten h1, h2 oder h3 im Text
-                const markdown = editor.value;
-                const match = markdown.match(/^#{1,3}\s+(.+)$/m);
-                const defaultTitle = match ? match[1].trim() : "Mein Artikel";
+        function getArticleTitle(markdown) {
+            const match = markdown.match(/^#{1,3}\s+(.+)$/m);
+            return match ? match[1].trim() : "Mein Artikel";
+        }
 
+        function saveArticle() {
+            const markdown = editor.value;
+            const defaultTitle = getArticleTitle(markdown);
+
+            if (!currentArticleId || !savedArticles[currentArticleId]) {
                 openInputModal("Bitte gib einen Namen für diesen Artikel ein:", defaultTitle, (title) => {
                     if (!title) return; // Abgebrochen
                     currentArticleId = 'art-' + Date.now();
@@ -289,8 +368,15 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
         }
 
         function finalizeSave() {
-            savedArticles[currentArticleId].content = editor.value;
-            savedArticles[currentArticleId].date = new Date().toISOString();
+            const article = savedArticles[currentArticleId];
+            if (!article) return;
+
+            const markdownTitle = getArticleTitle(editor.value);
+            article.title = article.title && article.title !== "Mein Artikel" && article.title !== markdownTitle
+                ? article.title
+                : markdownTitle;
+            article.content = editor.value;
+            article.date = new Date().toISOString();
             
             localStorage.setItem('newspaper-articles', JSON.stringify(savedArticles));
             localStorage.setItem('newspaper-current-id', currentArticleId);
