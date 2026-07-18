@@ -3,35 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Markdown-Zeitungs-Renderer v0.7.0</title>
+    <title>Markdown-Zeitungs-Renderer v0.10.0</title>
     
-    <!-- Dynamisches Manifest für die PWA-Fähigkeit -->
     <link rel="manifest" id="manifest-link">
     <meta name="theme-color" content="#1e293b">
     
-    <!-- Externe Bibliotheken -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Import einer klassischen Zeitungs-Serifenschrift */
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700;900&display=swap');
 
-        /* Eigener Scrollbar für einen schickeren Look */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Spezifische Zeitungs-Styles (unabhängig von Tailwind für den Inhalt) */
         #newspaper-output {
-            background-color: #fdfbf7; /* Leichter Zeitungspapier-Ton für mehr Authentizität */
+            background-color: #fdfbf7;
             padding: 3rem 4rem;
             column-count: 1;
             column-gap: 3rem;
-            column-rule: 1px solid #d1d5db; /* Diskrete Trennlinie zwischen den Spalten */
+            column-rule: 1px solid #d1d5db;
             line-height: 1.7;
             color: #1f2937;
             font-size: 15px;
@@ -41,60 +36,19 @@
 
         @media (min-width: 1024px) { #newspaper-output { column-count: 2; } }
 
-        #newspaper-output h1 { 
-            font-family: 'Playfair Display', serif; 
-            font-size: 3.5rem; 
-            text-transform: uppercase; 
-            text-align: center;
-            border-top: 6px double #111827; 
-            border-bottom: 2px solid #111827;
-            padding: 20px 0; 
-            margin-top: 0; 
-            margin-bottom: 30px; 
-            column-span: all; /* Wichtig: Überschrift geht über alle Spalten */
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-        }
-        #newspaper-output h2 { 
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem; 
-            margin-top: 1.5em; 
-            margin-bottom: 0.5em; 
-            break-inside: avoid; 
-            column-span: all; /* Sub-Überschrift geht nun auch über die gesamte Breite */
-            line-height: 1.25;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 10px;
-        }
-        #newspaper-output h3 { 
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem; 
-            font-weight: bold; 
-            margin-top: 1.5em; 
-            margin-bottom: 0.75em; 
-            break-inside: avoid; 
-        }
-        #newspaper-output p { 
-            margin-bottom: 1.2em; 
-            text-align: justify; 
-            hyphens: auto; 
-            orphans: 3; /* Verhindert einzelne Zeilen am Spaltenende */
-            widows: 3;  /* Verhindert einzelne Zeilen am Spaltenanfang */
-        }
+        #newspaper-output h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; text-transform: uppercase; text-align: center; border-top: 6px double #111827; border-bottom: 2px solid #111827; padding: 20px 0; margin-top: 0; margin-bottom: 30px; column-span: all; line-height: 1.1; letter-spacing: -0.02em; }
+        #newspaper-output h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-top: 1.5em; margin-bottom: 0.5em; break-inside: avoid; column-span: all; line-height: 1.25; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+        #newspaper-output h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.75em; break-inside: avoid; }
+        #newspaper-output p { margin-bottom: 1.2em; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }
         
-        figure.news-image {
-            margin: 25px auto; break-inside: avoid; text-align: center;
-        }
+        figure.news-image { margin: 25px auto; break-inside: avoid; text-align: center; }
         figure.img-full { column-span: all; width: 100%; }
         figure.img-medium { column-span: all; width: 60%; }
+        /* For small, we don't force column-span: all, letting it fit in the current column */
         figure.img-small { column-span: none; width: 100%; margin: 15px 0; }
         
         figure.news-image img { width: 100%; height: auto; display: block; border: 1px solid #e5e7eb; border-radius: 2px; }
-        figure.news-image figcaption {
-            font-family: 'Merriweather', serif;
-            font-size: 0.8rem; font-style: italic; color: #4b5563; margin-top: 10px;
-            line-height: 1.4; border-left: 3px solid #374151; padding-left: 12px; text-align: left;
-        }
+        figure.news-image figcaption { font-family: 'Merriweather', serif; font-size: 0.8rem; font-style: italic; color: #4b5563; margin-top: 10px; line-height: 1.4; border-left: 3px solid #374151; padding-left: 12px; text-align: left; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col font-sans overflow-hidden">
@@ -102,36 +56,24 @@
     <header class="bg-slate-900 text-white shadow-md flex-none z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
                 <h1 class="text-xl font-bold tracking-tight">Zeitungs-Renderer</h1>
             </div>
-            <div class="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400 border border-slate-700">v0.7.0</div>
+            <div class="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400 border border-slate-700">v0.10.0</div>
         </div>
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
-        
         <div class="w-full md:w-1/2 lg:w-5/12 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-1/2 md:h-full">
             <div class="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap gap-2 items-center justify-between">
+                <button onclick="document.getElementById('fileInput').click()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Bild</button>
+                <input type="file" id="fileInput" style="display:none" accept="image/*">
                 <div class="flex gap-2">
-                    <button onclick="document.getElementById('fileInput').click()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 hover:text-blue-600 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Bild einfügen">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span class="hidden sm:inline">Bild</span>
-                    </button>
-                    <input type="file" id="fileInput" style="display:none" accept="image/*">
-                </div>
-                
-                <div class="flex gap-2">
-                    <button onclick="saveDraft()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 hover:text-emerald-600 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Entwurf speichern">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                        <span class="hidden sm:inline">Speichern</span>
-                    </button>
-                    <button onclick="openClearModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500" title="Inhalt löschen">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                    <button onclick="openArticlesModal()" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 shadow-sm">Öffnen</button>
+                    <button id="save-btn" onclick="saveArticle()" class="px-3 py-1.5 text-sm font-medium text-white bg-slate-700 border border-slate-700 rounded-md hover:bg-slate-800 shadow-sm transition-colors duration-200">Speichern</button>
+                    <button onclick="openClearModal()" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-red-50 hover:text-red-600 shadow-sm">Leeren</button>
                 </div>
             </div>
-            <textarea id="editor" class="flex-1 p-4 w-full resize-none outline-none font-mono text-sm bg-white text-slate-800 transition-colors" placeholder="Schreibe hier deinen Artikel im Markdown-Format..."></textarea>
+            <textarea id="editor" class="flex-1 p-4 w-full resize-none outline-none font-mono text-sm bg-white text-slate-800 transition-colors"></textarea>
             <div class="bg-slate-50 border-t border-slate-200 p-2 text-xs text-slate-500 flex justify-between">
                 <span>Markdown wird live gerendert</span>
                 <span id="char-count">0 Zeichen</span>
@@ -140,35 +82,53 @@
 
         <div class="w-full md:w-1/2 lg:w-7/12 bg-slate-200 rounded-xl overflow-hidden relative flex flex-col h-1/2 md:h-full border border-slate-300 shadow-inner">
             <div class="absolute top-4 right-4 z-10 flex gap-2">
-                <button onclick="exportImage()" class="flex items-center gap-2 px-3 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-200" title="Als Bild (PNG) exportieren">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="hidden xl:inline">Bild Export</span>
-                </button>
-                <button onclick="exportPDF()" class="flex items-center gap-2 px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-200" title="Als PDF exportieren">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="hidden xl:inline">PDF Export</span>
-                </button>
+                <button onclick="exportImage()" class="px-3 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-lg">Bild Export</button>
+                <button onclick="exportPDF()" class="px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg">PDF Export</button>
             </div>
-            
             <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start pb-20" id="preview-container">
-                <!-- Der Output-Container ahmt ein echtes DinA4/Papier-Format nach -->
                 <div id="newspaper-output" class="max-w-[900px] w-full shrink-0 my-4 lg:my-8 transition-all"></div>
             </div>
         </div>
     </main>
 
-    <div id="delete-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 transform scale-95 transition-transform duration-200" id="delete-modal-content">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="bg-red-100 p-3 rounded-full text-red-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold text-slate-900">Alles löschen?</h3>
+    <div id="articles-modal" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-300" id="articles-modal-content">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">Meine Artikel</h2>
+                <button onclick="closeArticlesModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
             </div>
-            <p class="text-sm text-slate-500 mb-6">Bist du sicher, dass du den gesamten Entwurf unwiderruflich löschen möchtest? Dies kann nicht rückgängig gemacht werden.</p>
-            <div class="flex justify-end gap-3">
-                <button onclick="closeClearModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400">Abbrechen</button>
-                <button onclick="confirmClearDraft()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">Ja, löschen</button>
+            <div id="articles-list" class="p-4 overflow-y-auto flex-1 flex flex-col gap-2 bg-slate-50/50">
+                <!-- Artikel werden hier generiert -->
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-white flex justify-end">
+                <button onclick="createNewArticle()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-bold shadow-sm">+ Neuen Artikel beginnen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="input-modal" class="fixed inset-0 bg-slate-900/50 hidden z-[60] flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform scale-95 transition-transform duration-300" id="input-modal-content">
+            <div class="p-4 border-b border-slate-200">
+                <h3 id="input-modal-title" class="text-lg font-bold text-slate-800">Titel</h3>
+            </div>
+            <div class="p-4">
+                <input type="text" id="input-modal-field" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Name...">
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2">
+                <button onclick="closeInputModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Abbrechen</button>
+                <button id="input-modal-submit" class="px-4 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/50 hidden z-[60] flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform scale-95 transition-transform duration-300" id="confirm-modal-content">
+            <div class="p-5 text-center">
+                <h3 id="confirm-modal-text" class="text-lg font-medium text-slate-800 mb-4">Wirklich fortfahren?</h3>
+                <div class="flex justify-center gap-3">
+                    <button onclick="closeConfirmModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Abbrechen</button>
+                    <button id="confirm-modal-submit" class="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors">Ja, weiter</button>
+                </div>
             </div>
         </div>
     </div>
@@ -178,127 +138,285 @@
         const output = document.getElementById('newspaper-output');
         const fileInput = document.getElementById('fileInput');
         const charCount = document.getElementById('char-count');
-        const deleteModal = document.getElementById('delete-modal');
-        const deleteModalContent = document.getElementById('delete-modal-content');
         
-        const demoMarkdown = `# Die digitale Revolution\n## Ein neues Zeitalter der Typografie\nEs ist erstaunlich, wie einfach sich strukturierter Markdown-Text in ein klassisches Zeitungs-Layout verwandeln lässt.\n\n### Bildgrößen steuern\nDu kannst jetzt die Bildgröße steuern, indem du \`| klein\` oder \`| mittel\` an die Bildbeschreibung hängst.\n\nEin kleines Bild fügt sich direkt in die Textspalte ein:\n\n![Eine Pixelfrau | klein](data:image/png;base64,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)\n\nDies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)`;
+        let localImages = JSON.parse(localStorage.getItem('newspaper-images')) || {};
+        let savedArticles = JSON.parse(localStorage.getItem('newspaper-articles')) || {};
+        let currentArticleId = localStorage.getItem('newspaper-current-id');
+
+        const demoMarkdown = `# Die digitale Revolution
+## Ein neues Zeitalter der Typografie
+Es ist erstaunlich, wie einfach sich strukturierter Markdown-Text in ein klassisches Zeitungs-Layout verwandeln lässt.
+
+### Warum dieses Format?
+Die Lesbarkeit von Texten hängt stark von der Spaltenbreite ab. Das zweispaltige Layout ist der goldene Mittelweg.
+
+### Bild-Anatomie
+
+![Eine Pixelfrau | klein](data:image/png;base64,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)
+
+Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)
+
+[demo-bild]: img-demo
+`;
 
         window.onload = () => {
+            if (!localImages['img-demo']) {
+                localImages['img-demo'] = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAALkklEQVR4AezafaiedRkH8GuFmS3QlmlO5aRDaUunjCZJuqVYzmSatNm0UFChXLkmResfQZCyhbGZEUYqFPk6/3CKgSCJkgwVTDdfInE1dNNsrI0a5R+xfp/7nOvZ/Tznfs7zcp75jxvne67fy/V7+X6v6/e77+c5+0C8z/8dFOB9ngBxMAMOZsD7XIGDR+C9TIB1p8a+fvBe7uk9yYAkvWDh8bF02az45g+Ob4O2BJ/0Zw+0GAdUAAQAKaQXnhMx+8SZkzhlG8uHGMaA8TBp0IgaDogANgwIJPEdW/dGE/A47MS9lTD6s3zs2N6AFMN8wH+UGLkANok0LLp6byAEc86LSIj09m0zA3710zdi/bd2BfvIg7sqbh++8MJKEBW+9awwv/ZRYaQC2BziCCMRZ24M2Df30oDc9HNPRCB19i0Xxurb2+8EYty6+PZKOORlhXHKxsgI62gbBUYmgE0leWRnvPpAxKaLKyiDDT9158yKPIG0/WfrzIqsOuEIAoSQFcaAPiDEKEUYmQC5SYT+++ijqlXUiQEakjwifPgizm697YHqKCAORCCoYyEL+JgDiMCOAiMRIKP/+uNRXXQIJmlRTrI2rI8F5PUjiKhLU3T1mavuqw2yjZ91tQ2CTt+RCGBSJETGRYf8jCO+Hsjps2nn3qWoTzSTvDLyCPF1MSprI0JmgfF8+YC12Oli2gKIgg3bEKIIIl+d/4nd5carPndDaSeOdudc5BH32CtdjT/PP/dGEMExSgfrWj/rw9hpC2DRbuQRFEUbF/1KmDIghZI1pRrIjf1rWcyZuyoWLbm6sqtvuLGyhx16dSivvnxV8OFrPuNGgZEIgFBrM27+UkEcQeKU6vjjcPfdVTEzQZpf8unrq7ax5YdHnPXl7rjyGzG2enHwJ0KUf625S3nYn5EIkItLa2XkpXR9g/sK+cwAfkTgO7bgf8w48fFS998nzG6JkFkw3WMwUgHsXNoj76VFZtioMvJE4IO8J4Py+nt+Xl6GHlLsG2MlE0aVBdMSIC8gz21wQSVh5IkR5Z8y8hl51vEoXXHXlhPims//OLZ9917VRuibP/trAXzXXnxPo98wjUMLgLz0c4MnbEC0EXYMiOHyE3GkCZLW+UfemGfjH3HThqfjmtnfUZ2EpRv2Zwjf13b+LV7ackb1zjHJecCGFGBGl3Hd2uP6LTEDCQSRTos8oo6Bx5oy0gTRR4yM/iPLvxKJO27+XNyx4xeN29h889KWH3++HK3PTgcpwMBzyACRRxAxFjHWsx15l2D2WQB5Z9/G798yL1ZseKzCfU9sj23PfzDirzu4tUH6r/3Z25Uf//Q96chPtfkNWxlaABngIkJWdJFHWN3RUE7y2ScTlDs3+9DOlwKx2P5CZ1fVrj87lCvfbJimHVqA+roiCnXyiMoGti4GP9F/fu6Sagr2iodfjhXnHBtx7OlVW/0Xwurpp5xtytPFSAQQce/sLLJI2xirnplAoEN/tC/u3P1yfGzuFwOpS+5bG4sXRVQvQuU5b1wn6n4X3HR/Z/e06kML4A5A2sdWUUWORdqOfCjqJK/9mvLN0Ekfiph18tmVCJvvfTfUm6LPf88Pn23z+8Rpp8R9y8/XNRIMLYDVRZYlRFrEQfrrZ4mz+rFnucQhf9pY4ZUFt8TbK54JVlt0if4rSx9v87v24xtj7NbLxo9MNeP0fg0lQEbf0ggiSgREXYjZpqzNh5n1558RlQiIQv29X91kTdCXvspQ/KojU2yvn179KcC+Lo6T2pM80ojmOETffevScAyUvRkq619/043j5FUGQcNjsTX89V3hMZz1J686ftJes28qmwJM5TOpD/lszLIMOPSYB4IIIg4+ua2+/aHhyOcCv/ldliZZ7xqTGgdsGEiAjL41vNTUrTIRVq3bFGtXvlJB28D44+/3DynvBV6C9jfsL3lxcslmy+K73pgxTBYMJEAuljajr563v/Ky6x4PqF5YCgltg8DbHxCyej/oHFyOhrnr63NJEQYRYloCZBZYvI56ZLZt2NP4ilv3byuXC2+sfNx1ya355bzqxo/Of0/9oa3F+4fs1EgE6FeEoQRw+XmttSAQwqOvngVEGDoL3PRFiOobIgvUUaLvWKzZWL6CLu2ywFql2PbTrwh9C0BR7/9u+FypLkK2DWzrZ76fwV2OVD0L+pkmffoSAHmK5iBWFrAtEcqfwZqygM+Ux0CkiwjVmZ9/S6wt6Cybo4Lolwv2zIs2Ra6vXRaww4jQU4Am8haD+iZ84xNFBOlYPwp9HYMigre7NZu/H1CVy/l3ASpbq0It+r5sqdomfllXcVARegpg0k6k4ogSoZUFxTH7SrH9p7y4RIl0e2NHrfSLfoVyebaRn4g+QXOUtbOc68rCFKEza9O3bocSwAQWpHqKoC2zQFk724ZeIkxkAuLQNrYW/XwBkgUpgos4/e0ry73s0ALUJ0a2ngX1vlZ5zqzxYhFBhKtsKFEdb+zxu2SGdwJnv4fnwN3TEkAW5IqtSOy+u/WfGwiT/dXH3UXnRhQh/C2guhg9zwu5pq/CWuNKfzfyMsEeRN9flzPybeu2JmouDCSAlw3nq3MqC3cu6ktRfg/edt74R1fPdihpHkUIInieI7dt/ZPRyghZkSifA/TXz705E9ZN8tYjhkAop08v21MAF4knQU5k0Sz3a5Ft8yVEEWHN9z5ZieO1FtG15fv+NpQvQ5HvJKTum2iEHT112YC8QPiu0jtL25pdKj0FMI4ITdG3oP46bKher8rl73qVrf+aEIE4hEhwcdYBefUEksgmee3+GMMKDPI+gvdL3ri+BEjyFqG6gWBBbcqQ5LWrt9JfpQkTIrgXOruR1YYw2wTk00//VL76m9BTAOR9zPV8TfIi79uenBDhFELfVQ9/IW54cWGI6lj5YBNT/SPCxL3gbuC66eEzmTbUibZ1TFTsIVO/fmQnuruaKQVA3peedeIIWsyMSVqZj74l6xfGueeeVWHxg29G03f9/CeBEFA61my8PGRPCtlE3lr+GiXq+tkytPpxZPsVoasAyIu8W9asFmS9fLBJPsX4zHUr4rPrlsYp80+Nd3buiVmzPjIuwtrN4ze8QQOACNyPOuboIMRFG1cEXPvC0ra/CdZF8BXZulOj+mqsXxG6CmDx+v/jQRR5aiOvDjYFM84+P4647Ip4Yd4FFf78l7faRSiPtCmf9xYsSOLhHaHUT5l7UhDB/AnrETuD4lKUAfZWhgz00ygAFUXfTBZBtL6Auk2ATSE+//Q5sfDk4yqMHfnRySKU47B41W/Hs8Fz3uRNmDgGjo+jlC7mT1jPukSQeekjMN5T7D/betlGAXJQ3urIa2ORBhuwEZtC/KhZR8Q7u3ZzC+VOEZYt+1LrSPQUYiL6Jnvp1ddix+IrFVswt3Wtbx+EuHbiaNRFcAxag7oUphRA9HOcBcCCp123MmwgifNBHnEWtNmoI+E4gHuhUQjOiXJUOqNvnuyuW+2HH3d0dfTsS2D010VQnwpdBZDmOTCJUxxxREE/spBltg6b/Oei5dWReOrpFwMmCbH0JxGFONTJN0W/Prey+VlCEEE2qBOB7YWuAhhIBBOaGPGMeJ1wCsF/KtjoIV/9drw6Z0klwiQh3BEFzj2BkrxxMcW/bTv/HenTKcIUw1pdjQJ4lfRKKaWSfBJFXrluW7P1USCkM90khOOBPHH4JLGppuVDhPQhgrLgsb3QKIBBvz5kZUxFnk+KoDwIbLpJCMShX/LWrJNXB/sWPIFUnwpdBTCImqKtnGRZ9URnPdv7sSmEo1GH9m7j64Tr5fQ31r6z3ss2CjBvwcp9VDSZCZAkBKveiaaNdPqMqp57smaW97z599b02W7/eLQ6uhQaBUhfpJVZ5Fn1Trz7zKawcGf7gapbC3kW+Q9v39paSrtKv1nQVYD6BEmeNXkdNpH1ejnbRm2tgSRr7jp59QSffrLg/wAAAP//EM9kRAAAAAZJREFUAwDDXrDZr3Lt9AAAAABJRU5ErkJggg==";
+                localStorage.setItem('newspaper-images', JSON.stringify(localImages));
+            }
             const saved = localStorage.getItem('newspaper-draft');
-            editor.value = saved || demoMarkdown;
+            editor.value = saved !== null ? saved : demoMarkdown;
             render();
             initPWA();
         };
 
         function processMarkdown(text) {
-            // Bilder für das Zeitungs-Layout formatieren und Größen erkennen
-            return text.replace(/!\[(.*?)\]\((.*?)\)/g, (match, altText, url) => {
+            const formatAsFigure = (altText, urlOrRef, isRef) => {
                 let alt = altText;
-                let sizeClass = 'img-full'; // Standard: Groß über alle Spalten
+                let sizeClass = 'img-full'; // Default
                 
-                // Prüfen, ob ein Größen-Tag mit "|" angehängt wurde
+                // Enhanced parsing for | size
                 if (altText.includes('|')) {
                     const parts = altText.split('|');
                     alt = parts[0].trim();
                     const sizeIndicator = parts[1].trim().toLowerCase();
-                    
-                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') {
-                        sizeClass = 'img-small';
-                    } else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') {
-                        sizeClass = 'img-medium';
-                    }
+                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') sizeClass = 'img-small';
+                    else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') sizeClass = 'img-medium';
                 }
                 
-                return `<figure class="news-image ${sizeClass}"><img src="${url}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
+                // Return figure string without wrapping in markdown, preserving attributes
+                return `<figure class="news-image ${sizeClass}"><img src="${isRef ? '' : urlOrRef}" alt="${alt}" data-ref="${isRef ? urlOrRef : ''}"><figcaption>${alt}</figcaption></figure>`;
+            };
+
+            // Replace Reference-style images first: ![alt][ref]
+            let html = text.replace(/!\[(.*?)\]\[(.*?)\]/g, (match, alt, ref) => formatAsFigure(alt, ref, true));
+            // Then replace direct-style images: ![alt](url)
+            html = html.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => formatAsFigure(alt, url, false));
+
+            // Process Markdown
+            const container = document.createElement('div');
+            container.innerHTML = marked.parse(html);
+            
+            // Resolve local images
+            container.querySelectorAll('img[data-ref]').forEach(img => {
+                const refId = img.getAttribute('data-ref');
+                if (localImages[refId]) img.src = localImages[refId];
             });
+
+            return container.innerHTML;
         }
 
         function render() {
             let markdown = editor.value;
-            let html = processMarkdown(markdown);
-            output.innerHTML = marked.parse(html);
+            output.innerHTML = processMarkdown(markdown);
             charCount.textContent = `${markdown.length} Zeichen`;
         }
 
-        function saveDraft() {
-            localStorage.setItem('newspaper-draft', editor.value);
-            // Kleines visuelles Feedback
-            const btn = document.querySelector('button[title="Entwurf speichern"]');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="hidden sm:inline text-emerald-600">Gespeichert!</span>`;
-            setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
-        }
+        let inputModalCallback = null;
+        let confirmModalCallback = null;
 
-        // --- Custom Modal Logik (Ersetzt window.confirm) ---
-        function openClearModal() {
-            deleteModal.classList.remove('hidden');
-            // Timeout für Fade-In Effekt
+        function openInputModal(title, defaultText, callback) {
+            document.getElementById('input-modal-title').innerText = title;
+            const field = document.getElementById('input-modal-field');
+            field.value = defaultText;
+            inputModalCallback = callback;
+
+            const modal = document.getElementById('input-modal');
+            const content = document.getElementById('input-modal-content');
+            modal.classList.remove('hidden');
             setTimeout(() => {
-                deleteModal.classList.remove('opacity-0');
-                deleteModalContent.classList.remove('scale-95');
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                field.focus();
             }, 10);
         }
 
-        function closeClearModal() {
-            deleteModal.classList.add('opacity-0');
-            deleteModalContent.classList.add('scale-95');
-            // Timeout warten bis Animation fertig ist
-            setTimeout(() => {
-                deleteModal.classList.add('hidden');
-            }, 200);
+        function closeInputModal() {
+            const modal = document.getElementById('input-modal');
+            const content = document.getElementById('input-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        function confirmClearDraft() {
-            editor.value = '';
-            localStorage.removeItem('newspaper-draft');
-            render();
-            closeClearModal();
+        document.getElementById('input-modal-submit').onclick = () => {
+            if(inputModalCallback) inputModalCallback(document.getElementById('input-modal-field').value);
+            closeInputModal();
+        };
+
+        function openConfirmModal(text, callback) {
+            document.getElementById('confirm-modal-text').innerText = text;
+            confirmModalCallback = callback;
+
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
         }
-        // ----------------------------------------------------
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        document.getElementById('confirm-modal-submit').onclick = () => {
+            if(confirmModalCallback) confirmModalCallback();
+            closeConfirmModal();
+        };
+
+        function saveArticle() {
+            if (!currentArticleId || !savedArticles[currentArticleId]) {
+                // Suche nach der ersten h1, h2 oder h3 im Text
+                const markdown = editor.value;
+                const match = markdown.match(/^#{1,3}\s+(.+)$/m);
+                const defaultTitle = match ? match[1].trim() : "Mein Artikel";
+
+                openInputModal("Bitte gib einen Namen für diesen Artikel ein:", defaultTitle, (title) => {
+                    if (!title) return; // Abgebrochen
+                    currentArticleId = 'art-' + Date.now();
+                    savedArticles[currentArticleId] = { title: title };
+                    finalizeSave();
+                });
+            } else {
+                finalizeSave();
+            }
+        }
+
+        function finalizeSave() {
+            savedArticles[currentArticleId].content = editor.value;
+            savedArticles[currentArticleId].date = new Date().toISOString();
+            
+            localStorage.setItem('newspaper-articles', JSON.stringify(savedArticles));
+            localStorage.setItem('newspaper-current-id', currentArticleId);
+            localStorage.setItem('newspaper-draft', editor.value);
+            
+            // Visuelles Feedback
+            const btn = document.getElementById('save-btn');
+            btn.textContent = "Gespeichert!";
+            btn.classList.add('bg-emerald-600', 'border-emerald-600');
+            btn.classList.remove('bg-slate-700', 'border-slate-700');
+            setTimeout(() => {
+                btn.textContent = "Speichern";
+                btn.classList.remove('bg-emerald-600', 'border-emerald-600');
+                btn.classList.add('bg-slate-700', 'border-slate-700');
+            }, 1500);
+        }
+
+        function openArticlesModal() {
+            renderArticlesList();
+            const modal = document.getElementById('articles-modal');
+            const content = document.getElementById('articles-modal-content');
+            modal.classList.remove('hidden');
+            // Timeout für weiche CSS-Animation
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeArticlesModal() {
+            const modal = document.getElementById('articles-modal');
+            const content = document.getElementById('articles-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderArticlesList() {
+            const list = document.getElementById('articles-list');
+            list.innerHTML = '';
+            const entries = Object.entries(savedArticles).sort((a,b) => new Date(b[1].date) - new Date(a[1].date));
+            
+            if (entries.length === 0) {
+                list.innerHTML = '<p class="text-sm text-slate-500 text-center py-8">Noch keine Artikel gespeichert.</p>';
+                return;
+            }
+            
+            entries.forEach(([id, art]) => {
+                const isCurrent = id === currentArticleId;
+                const dateStr = new Date(art.date).toLocaleDateString('de-DE', { hour: '2-digit', minute:'2-digit' });
+                
+                const div = document.createElement('div');
+                div.className = `flex justify-between items-center p-3 rounded-lg border transition-colors ${isCurrent ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'}`;
+                div.innerHTML = `
+                    <div class="flex-1 cursor-pointer" onclick="loadArticle('${id}')">
+                        <div class="font-bold text-slate-800 ${isCurrent ? 'text-blue-700' : ''}">${art.title}</div>
+                        <div class="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                            <span class="inline-block w-2 h-2 rounded-full ${isCurrent ? 'bg-blue-500' : 'bg-slate-300'}"></span>
+                            Zuletzt bearbeitet: ${dateStr}
+                        </div>
+                    </div>
+                    <button onclick="deleteArticle('${id}')" title="Löschen" class="ml-4 text-red-400 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function loadArticle(id) {
+            if (savedArticles[id]) {
+                editor.value = savedArticles[id].content;
+                currentArticleId = id;
+                localStorage.setItem('newspaper-current-id', currentArticleId);
+                localStorage.setItem('newspaper-draft', editor.value);
+                render();
+                closeArticlesModal();
+            }
+        }
+
+        function deleteArticle(id) {
+            openConfirmModal('Möchtest du diesen Artikel wirklich unwiderruflich löschen?', () => {
+                delete savedArticles[id];
+                localStorage.setItem('newspaper-articles', JSON.stringify(savedArticles));
+                if (currentArticleId === id) {
+                    currentArticleId = null;
+                    localStorage.removeItem('newspaper-current-id');
+                }
+                renderArticlesList();
+            });
+        }
+
+        function createNewArticle() {
+            currentArticleId = null;
+            localStorage.removeItem('newspaper-current-id');
+            editor.value = '';
+            localStorage.setItem('newspaper-draft', '');
+            render();
+            closeArticlesModal();
+        }
+
+        function openClearModal() {
+            openConfirmModal('Wirklich den aktuellen Editor leeren? (Gespeicherte Artikel bleiben erhalten)', () => {
+                editor.value = '';
+                localStorage.setItem('newspaper-draft', '');
+                currentArticleId = null;
+                localStorage.removeItem('newspaper-current-id');
+                render();
+            });
+        }
 
         function exportPDF() {
             const element = document.getElementById('newspaper-output');
-            
-            // Konfiguration für besseren PDF-Export
-            const opt = {
-                margin:       10,
-                filename:     'MeineZeitung.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            
-            // Vor dem Export etwas umstrukturieren für perfekte PDF Maße
-            element.style.width = '800px'; 
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.style.width = '100%'; // Zurücksetzen nach Export
-            });
+            html2pdf().from(element).save('MeineZeitung.pdf');
         }
 
         function exportImage() {
             const element = document.getElementById('newspaper-output');
-            const originalWidth = element.style.width;
-            
-            // Temporäre Breite für ein sauberes, zweispaltiges Rendering im Bild
-            element.style.width = '800px'; 
-            
-            // html2canvas explizit aufrufen
-            html2canvas(element, {
-                scale: 2, // Hohe Auflösung für scharfen Text
-                useCORS: true, // Erlaubt ggf. externe Bilder
-                backgroundColor: '#fdfbf7' // Nutzt den exakten Papierton
-            }).then(canvas => {
-                // Breite zurücksetzen
-                element.style.width = originalWidth || '100%';
-                
-                // Download anstoßen
+            // Ensure proper rendering scale
+            html2canvas(element, {scale: 2, backgroundColor: '#fdfbf7'}).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'MeineZeitung.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-            }).catch(err => {
-                console.error("Fehler beim Bild-Export:", err);
-                element.style.width = originalWidth || '100%';
             });
         }
 
@@ -307,94 +425,29 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(event) {
-                const base64 = event.target.result;
-                const markdownImage = `![Bildbeschreibung](${base64})`;
+                const imgId = 'img-' + Date.now();
+                localImages[imgId] = event.target.result;
+                localStorage.setItem('newspaper-images', JSON.stringify(localImages));
+                // Add reference-style syntax
+                const markdownImage = `\n![Bildbeschreibung | mittel][${imgId}]\n\n[${imgId}]: ${imgId}\n`;
                 const start = editor.selectionStart;
-                editor.value = editor.value.slice(0, start) + "\n" + markdownImage + "\n" + editor.value.slice(start);
+                editor.value = editor.value.slice(0, start) + markdownImage + editor.value.slice(start);
+                localStorage.setItem('newspaper-draft', editor.value);
                 render();
             };
             reader.readAsDataURL(file);
-            fileInput.value = ''; // Reset Input
         });
 
-        editor.addEventListener('input', render);
+        editor.addEventListener('input', () => {
+            render();
+            localStorage.setItem('newspaper-draft', editor.value); // Auto-save for refresh
+        });
 
         function initPWA() {
-            // 1. Dynamisches Manifest erstellen (damit wir keine extra .json brauchen)
-            const manifest = {
-                name: "Markdown Zeitung",
-                short_name: "Zeitung",
-                description: "Erstelle klassische Zeitungsartikel mit Markdown",
-                display: "standalone",
-                start_url: ".",
-                background_color: "#f8fafc",
-                theme_color: "#1e293b",
-                icons: [{
-                    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFlMjkzYiIvPjx0ZXh0IHk9IjUyIiB4PSI1MCIgZm9udC1zaXplPSI1NCIgZm9udC1mYW1pbHk9InNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIj5aPC90ZXh0Pjwvc3ZnPg==",
-                    sizes: "512x512",
-                    type: "image/svg+xml",
-                    purpose: "any maskable"
-                }]
-            };
-            
+            const manifest = { name: "Markdown Zeitung", short_name: "Zeitung", display: "standalone", start_url: ".", background_color: "#f8fafc", theme_color: "#1e293b", icons: [{ src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFlMjkzYiIvPjx0ZXh0IHk9IjUyIiB4PSI1MCIgZm9udC1zaXplPSI1NCIgZm9udC1mYW1pbHk9InNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIj5aPC90ZXh0Pjwvc3ZnPg==", sizes: "512x512", type: "image/svg+xml" }] };
             const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            document.getElementById('manifest-link').setAttribute('href', manifestURL);
-
-            // 2. Service Worker dynamisch registrieren
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE_NAME = 'zeitung-v0.7.0';
-                    self.addEventListener('install', (e) => {
-                        self.skipWaiting();
-                    });
-                    self.addEventListener('activate', (e) => {
-                        self.clients.claim();
-                    });
-                    self.addEventListener('fetch', (e) => {
-                        // Einfache Pass-Through Strategie für den Anfang
-                        e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
-                    });
-                `;
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swUrl = URL.createObjectURL(swBlob);
-                
-                navigator.serviceWorker.register(swUrl)
-                    .then(reg => console.log('PWA Service Worker registriert!'))
-                    .catch(err => console.error('SW Registrierung fehlgeschlagen:', err));
-            }
+            document.getElementById('manifest-link').setAttribute('href', URL.createObjectURL(manifestBlob));
         }
     </script>
-    
-    <!-- 
-    ======================================================================
-    CHANGELOG
-    ======================================================================
-    v0.7.0 (Minor Update: Bildgrößen steuern)
-    - NEU: Custom Markdown-Erweiterung im Alt-Text. Nutze "![Alt-Text | klein](url)" oder "![Alt-Text | mittel](url)" für kleinere Bilder.
-    - VERBESSERT: Kleine Bilder fügen sich nun fließend in die Text-Spalten ein (`column-span: none`), mittlere Bilder bleiben zentriert über alle Spalten.
-
-    v0.6.0 (Minor Update: Bild-Export)
-    - NEU: Funktion zum Exportieren des gerenderten Zeitungsartikels als hochauflösendes PNG-Bild.
-    - NEU: html2canvas-Bibliothek hinzugefügt für zuverlässiges DOM-to-Image Rendering.
-    - VERBESSERT: Export-Buttons gruppiert und responsive optimiert.
-
-    v0.5.0 (Minor Update: Newspaper Layout Refactoring)
-    - VERBESSERT: Authentischere Zeitungs-Optik durch leicht getönten Papier-Hintergrund (#fdfbf7).
-    - VERBESSERT: Spalten-Layout optimiert. H1 und H2 spannen sich nun zwingend über alle Spalten (`column-span: all`).
-    - VERBESSERT: Eine dezente Trennlinie (`column-rule`) zwischen den Textspalten hinzugefügt.
-    - VERBESSERT: Typografie überarbeitet (Größere Headlines, bessere Zeilenhöhe, `orphans` und `widows` für sauberen Textfluss).
-    - VERBESSERT: Container-Breite für die Vorschau auf 900px erhöht und Positionierung angepasst, damit das Blatt oben beginnt.
-
-    v0.4.0 (Minor Update: UI/UX & PWA)
-    - NEU: Komplettes Redesign mit Tailwind CSS für ein professionelles "App-Gefühl".
-    - NEU: Split-Pane Layout (Editor links, Vorschau rechts). Responsive auf Mobile (untereinander).
-    - NEU: Inline PWA Implementierung. App generiert nun ein Manifest und einen simplen Service Worker on-the-fly.
-    - NEU: Modernes Bestätigungs-Modal ersetzt die native, unschöne `window.confirm()` Funktion.
-    - VERBESSERT: PDF Export nutzt nun genaue Konfigurations-Parameter (A4, skalierte Auflösung).
-    - VERBESSERT: Visuelles Feedback beim "Entwurf speichern".
-    - BEHOBEN: Scrollbars in modernen Browsern dezent angepasst.
-    ====================================================================== 
-    -->
 </body>
 </html>
