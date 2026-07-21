@@ -23,23 +23,32 @@
 
         #newspaper-output {
             background-color: #fdfbf7;
-            padding: 3rem 4rem;
+            padding: 2rem 1.5rem; /* Mobile padding */
             column-count: 1;
             column-gap: 3rem;
             column-rule: 1px solid #d1d5db;
             line-height: 1.7;
             color: #1f2937;
-            font-size: 15px;
+            font-size: 14px;
             font-family: 'Merriweather', serif;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow-wrap: break-word; /* Prevent overflow */
+            word-wrap: break-word;
         }
 
         @media (min-width: 1024px) { #newspaper-output { column-count: 2; } }
 
-        #newspaper-output h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; text-transform: uppercase; text-align: center; border-top: 6px double #111827; border-bottom: 2px solid #111827; padding: 20px 0; margin-top: 0; margin-bottom: 30px; column-span: all; line-height: 1.1; letter-spacing: -0.02em; }
+        #newspaper-output h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 10vw, 3.5rem); text-transform: uppercase; text-align: center; border-top: 6px double #111827; border-bottom: 2px solid #111827; padding: 20px 0; margin-top: 0; margin-bottom: 30px; column-span: all; line-height: 1.1; letter-spacing: -0.02em; }
         #newspaper-output h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-top: 1.5em; margin-bottom: 0.5em; break-inside: avoid; column-span: all; line-height: 1.25; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
         #newspaper-output h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.75em; break-inside: avoid; }
-        #newspaper-output p { margin-bottom: 1.2em; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }
+        #newspaper-output p { margin-bottom: 1.2em; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }        
+
+        @media (min-width: 640px) {
+            #newspaper-output {
+                padding: 3rem 4rem; /* Restore desktop padding */
+                font-size: 15px;
+            }
+        }
         
         figure.news-image { margin: 25px auto; break-inside: avoid; text-align: center; }
         figure.img-full { column-span: all; width: 100%; }
@@ -150,6 +159,13 @@
             flex-shrink: 0;
         }
     </style>
+
+    <style>
+        .tab-button {
+            padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; color: #475569; border-bottom: 3px solid transparent; transition: all 0.2s ease;
+        }
+        .tab-active { color: #0f172a; border-bottom-color: #1e293b; }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col font-sans overflow-hidden">
 
@@ -162,8 +178,13 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-[1600px] w-full mx-auto flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
-        <div class="w-full md:w-1/2 lg:w-5/12 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-1/2 md:h-full">
+    <main class="flex-1 max-w-[1600px] w-full mx-auto flex flex-col md:flex-row md:gap-4 md:p-4 overflow-hidden">
+        <div id="mobile-tabs" class="flex-none md:hidden flex border-b border-slate-300 bg-slate-100 px-2 pt-2">
+            <button id="tab-editor" class="tab-button tab-active">Editor</button>
+            <button id="tab-preview" class="tab-button">Vorschau</button>
+        </div>
+
+        <div id="editor-pane" class="w-full md:w-1/2 lg:w-5/12 flex flex-col bg-white md:rounded-xl md:shadow-sm md:border md:border-slate-200 overflow-hidden h-full">
             <div class="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex gap-2">
                     <div class="image-menu-wrapper">
@@ -195,12 +216,12 @@
             </div>
         </div>
 
-        <div class="w-full md:w-1/2 lg:w-7/12 bg-slate-200 rounded-xl overflow-hidden relative flex flex-col h-1/2 md:h-full border border-slate-300 shadow-inner">
+        <div id="preview-pane" class="w-full md:w-1/2 lg:w-7/12 bg-slate-200 md:rounded-xl overflow-hidden relative flex flex-col h-full md:border md:border-slate-300 md:shadow-inner hidden md:flex">
             <div class="absolute top-4 right-4 z-10 flex gap-2">
                 <button onclick="exportImage()" class="px-3 py-2 text-sm font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-lg">Bild Export</button>
                 <button onclick="exportPDF()" class="px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg">PDF Export</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start pb-20" id="preview-container">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start pb-20 bg-slate-200" id="preview-container">
                 <div id="newspaper-output" class="max-w-[900px] w-full shrink-0 my-4 lg:my-8 transition-all"></div>
             </div>
         </div>
@@ -836,6 +857,62 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             };
             reader.readAsDataURL(file);
         });
+
+        // Mobile Tabs & Swipe Logic
+        const editorPane = document.getElementById('editor-pane');
+        const previewPane = document.getElementById('preview-pane');
+        const tabEditor = document.getElementById('tab-editor');
+        const tabPreview = document.getElementById('tab-preview');
+
+        function showTab(tabName) {
+            if (tabName === 'editor') {
+                editorPane.classList.remove('hidden');
+                previewPane.classList.add('hidden');
+                tabEditor.classList.add('tab-active');
+                tabPreview.classList.remove('tab-active');
+            } else { // preview
+                editorPane.classList.add('hidden');
+                previewPane.classList.remove('hidden', 'md:flex');
+                previewPane.classList.add('flex');
+                tabEditor.classList.remove('tab-active');
+                tabPreview.classList.add('tab-active');
+            }
+        }
+
+        if (tabEditor) {
+            tabEditor.addEventListener('click', () => showTab('editor'));
+            tabPreview.addEventListener('click', () => showTab('preview'));
+        }
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50;
+
+        function handleSwipe() {
+            const swiped = touchEndX - touchStartX;
+            if (Math.abs(swiped) < swipeThreshold) return;
+
+            if (swiped < 0 && !tabPreview.classList.contains('tab-active')) {
+                // Swiped left, show preview
+                showTab('preview');
+            } else if (swiped > 0 && !tabEditor.classList.contains('tab-active')) {
+                // Swiped right, show editor
+                showTab('editor');
+            }
+        }
+
+        document.body.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.body.addEventListener('touchend', e => {
+            // Only swipe if we are in mobile view
+            if (window.innerWidth < 768) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }
+        }, { passive: true });
+
 
         editor.addEventListener('input', () => {
             render();
