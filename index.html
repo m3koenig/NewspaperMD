@@ -165,14 +165,19 @@
     <main class="flex-1 max-w-[1600px] w-full mx-auto flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
         <div class="w-full md:w-1/2 lg:w-5/12 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-1/2 md:h-full">
             <div class="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap gap-2 items-center justify-between">
-                <div class="image-menu-wrapper">
-                    <button id="image-trigger" type="button" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Bild</button>
-                    <div id="image-menu" class="image-menu">
-                        <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-mode="direct">Direkteinfügen</button>
-                        <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-mode="reference">Als Referenz einfügen</button>
-                        <div class="image-submenu">
-                            <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-action="embed-images">Bilder in Text einbetten (Base64)</button>
-                            <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-action="extract-images">Bilder aus Text extrahieren</button>
+                <div class="flex gap-2">
+                    <div class="image-menu-wrapper">
+                        <button id="image-trigger" type="button" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50">Bild</button>
+                        <div id="image-menu" class="image-menu">
+                            <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-mode="direct">Direkteinfügen</button>
+                            <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-mode="reference">Als Referenz einfügen</button>
+                            <div class="image-submenu">
+                                <button id="show-raw-images-btn" type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100">Gespeicherte Bilder anzeigen</button>
+                            </div>
+                            <div class="image-submenu">
+                                <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-action="embed-images">Bilder in Text einbetten (Base64)</button>
+                                <button type="button" class="image-menu-item px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100" data-action="extract-images">Bilder aus Text extrahieren</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -184,10 +189,6 @@
                 </div>
             </div>
             <textarea id="editor" class="flex-1 p-4 w-full resize-none outline-none font-mono text-sm bg-white text-slate-800 transition-colors"></textarea>
-            <div class="raw-images-panel">
-                <div class="text-xs font-semibold text-slate-600 mb-2">Raw Base64 Bilder</div>
-                <div id="raw-images-output" class="raw-images-list"></div>
-            </div>
             <div class="bg-slate-50 border-t border-slate-200 p-2 text-xs text-slate-500 flex justify-between">
                 <span>Markdown wird live gerendert</span>
                 <span id="char-count">0 Zeichen</span>
@@ -216,6 +217,21 @@
             </div>
             <div class="p-4 border-t border-slate-200 bg-white flex justify-end">
                 <button onclick="createNewArticle()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-bold shadow-sm">+ Neuen Artikel beginnen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="raw-images-modal" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-300" id="raw-images-modal-content">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">Gespeicherte Base64-Bilder</h2>
+                <button onclick="closeRawImagesModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div id="raw-images-output" class="p-4 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-slate-50/50">
+                <!-- Bilder werden hier generiert -->
+            </div>
+            <div class="p-3 border-t border-slate-200 bg-white text-center">
+                <span class="text-xs text-slate-500">Klicken Sie auf ein Bild, um den Markdown-Referenz-Tag zu kopieren.</span>
             </div>
         </div>
     </div>
@@ -254,8 +270,6 @@
         const charCount = document.getElementById('char-count');
         const imageTrigger = document.getElementById('image-trigger');
         const imageMenu = document.getElementById('image-menu');
-        const rawImagesOutput = document.getElementById('raw-images-output');
-        
         let localImages = JSON.parse(localStorage.getItem('newspaper-images')) || {};
         let pendingImageMode = 'direct';
         let savedArticles = JSON.parse(localStorage.getItem('newspaper-articles')) || {};
@@ -276,15 +290,15 @@ Ein praktisches Beispiel für einen [Referenz-Link][demo-link] ist dieser Satz.
 
 ## Bild-Anatomie
 
-![Eine Pixelfrau| klein][PixelFrau]
+![Eine Pixelfrau| S][PixelFrau]
 
 Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.io/sdvcharactercreator)
 
 ## <!-- pagebreak -->
 
-## Anderes Demo Bild
+## Anderes Demo Bild (L ist Standard)
 
-![Beispielbild | groß][demo-bild]
+![Beispielbild | L][demo-bild]
 
 
 
@@ -310,7 +324,6 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             }
 
             editor.value = initialMarkdown;
-            updateRawImagesView();
             render();
             initPWA();
         };
@@ -369,8 +382,8 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
                     const parts = altText.split('|');
                     alt = parts[0].trim();
                     const sizeIndicator = parts[1].trim().toLowerCase();
-                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') sizeClass = 'img-small';
-                    else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') sizeClass = 'img-medium';
+                    if (sizeIndicator === 's' || sizeIndicator === 'small') sizeClass = 'img-small';
+                    else if (sizeIndicator === 'm' || sizeIndicator === 'medium') sizeClass = 'img-medium';
                 }
 
                 const resolvedUrl = localImages[destination] || destination;
@@ -393,8 +406,8 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
                     const parts = altText.split('|');
                     alt = parts[0].trim();
                     const sizeIndicator = parts[1].trim().toLowerCase();
-                    if (sizeIndicator === 'klein' || sizeIndicator === 'small') sizeClass = 'img-small';
-                    else if (sizeIndicator === 'mittel' || sizeIndicator === 'medium') sizeClass = 'img-medium';
+                    if (sizeIndicator === 's' || sizeIndicator === 'small') sizeClass = 'img-small';
+                    else if (sizeIndicator === 'm' || sizeIndicator === 'medium') sizeClass = 'img-medium';
                 }
                 
                 return `<figure class="news-image ${sizeClass}"><img src="${urlOrRef}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
@@ -635,28 +648,67 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             });
         }
 
+        function openRawImagesModal() {
+            updateRawImagesView();
+            const modal = document.getElementById('raw-images-modal');
+            const content = document.getElementById('raw-images-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeRawImagesModal() {
+            const modal = document.getElementById('raw-images-modal');
+            const content = document.getElementById('raw-images-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
         function updateRawImagesView() {
+            const rawImagesOutput = document.getElementById('raw-images-output');
+            if (!rawImagesOutput) return;
+
             const entries = Object.entries(localImages);
             if (entries.length === 0) {
-                rawImagesOutput.innerHTML = '<div class="text-sm text-slate-500">Keine Bilder gespeichert.</div>';
+                rawImagesOutput.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Keine Bilder gespeichert.</div>';
                 return;
             }
 
             rawImagesOutput.innerHTML = entries.map(([id, dataUrl]) => {
-                const previewUrl = dataUrl;
                 const shortLabel = id.length > 24 ? `${id.slice(0, 24)}…` : id;
                 const typeLabel = dataUrl.startsWith('data:image/png') ? 'PNG' : dataUrl.startsWith('data:image/jpeg') ? 'JPG' : 'Bild';
+                const copyTag = `![Beschreibung][${id}]`;
                 return `
-                    <div class="raw-image-item" title="${dataUrl}">
-                        <img class="raw-image-preview" src="${previewUrl}" alt="${id}">
-                        <div class="flex-1 min-w-0">
-                            <div class="raw-image-name">${shortLabel}</div>
-                            <div class="raw-image-meta">${typeLabel} • Base64</div>
+                    <div class="raw-image-item" title="Kopieren: ${copyTag}" onclick="navigator.clipboard.writeText('${copyTag}')">
+                        <img class="raw-image-preview !w-full !h-32" src="${dataUrl}" alt="${id}">
+                        <div class="p-2 w-full">
+                            <div class="raw-image-name !whitespace-normal">${shortLabel}</div>
+                            <div class="raw-image-meta mt-1">${typeLabel} • Base64</div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
+
+        // Override some styles for the modal view
+        const modalStyleOverrides = `
+            #raw-images-output .raw-image-item {
+                flex-direction: column;
+                justify-content: flex-start;
+                padding: 0;
+            }
+            #raw-images-output .raw-image-item:hover {
+                transform: translateY(-2px);
+                border-color: #64748b;
+                box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+            }
+        `;
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = modalStyleOverrides;
+        document.head.appendChild(styleSheet);
 
         function embedImagesInText() {
             let markdown = editor.value;
@@ -718,13 +770,13 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             const after = editor.value.slice(end);
 
             if (mode === 'reference') {
-                const referenceSnippet = `![Bildbeschreibung | mittel][${imgId}]`;
+                const referenceSnippet = `![Bildbeschreibung | M][${imgId}]`;
                 editor.value = before + referenceSnippet + after;
                 editor.value += `\n\n[${imgId}]: ${imgId}\n`;
                 const newCursor = start + referenceSnippet.length;
                 editor.setSelectionRange(newCursor, newCursor);
             } else {
-                const directSnippet = `![Bildbeschreibung | mittel](${dataUrl})`;
+                const directSnippet = `!Bildbeschreibung | M`;
                 editor.value = before + directSnippet + after;
                 const newCursor = start + directSnippet.length;
                 editor.setSelectionRange(newCursor, newCursor);
@@ -734,32 +786,40 @@ Dies wurde erstellt mit [Jazzy Bee's sdvcharactercreator](https://jazzybee.itch.
             render();
         }
 
+        document.getElementById('show-raw-images-btn').addEventListener('click', function(event) {
+            event.stopPropagation();
+            imageMenu.classList.remove('open');
+            openRawImagesModal();
+        });
+
         imageTrigger.addEventListener('click', function(event) {
             event.stopPropagation();
             imageMenu.classList.toggle('open');
         });
 
-        document.querySelectorAll('.image-menu-item').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.getAttribute('data-action');
-                const mode = this.getAttribute('data-mode');
-
-                if (action === 'embed-images') {
-                    imageMenu.classList.remove('open');
-                    embedImagesInText();
-                    return;
-                }
-
-                if (action === 'extract-images') {
-                    imageMenu.classList.remove('open');
-                    extractImagesFromText();
-                    return;
-                }
-
-                pendingImageMode = mode || 'direct';
-                imageMenu.classList.remove('open');
+        imageMenu.addEventListener('click', function(event) {
+            const button = event.target.closest('.image-menu-item');
+            if (!button) return;
+        
+            const action = button.getAttribute('data-action');
+            const mode = button.getAttribute('data-mode');
+        
+            // This specific button is handled by its own listener, so we ignore it here.
+            if (button.id === 'show-raw-images-btn') {
+                return;
+            }
+        
+            if (action === 'embed-images') {
+                embedImagesInText();
+            } else if (action === 'extract-images') {
+                extractImagesFromText();
+            } else if (mode) {
+                // Only items with a 'data-mode' should trigger the file input
+                pendingImageMode = mode;
                 fileInput.click();
-            });
+            }
+        
+            imageMenu.classList.remove('open');
         });
 
         document.addEventListener('click', function() {
